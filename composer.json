@@ -1,0 +1,15 @@
+{
+    "name": "crodas/influx-php",
+    "description": "Simple client for InfluxDB",
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "César D. Rodas",
+            "email": "crodas@php.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "classmap":["lib/"]
+    }
+}
