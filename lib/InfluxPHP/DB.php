@@ -50,6 +50,16 @@ class DB extends BaseHTTP
         $this->base   = "db/$name/";
     }
 
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function drop()
+    {
+        return $this->client->deleteDatabase($this->name);
+    }
+
     public function insert($name, Array $data)
     {
         $points = [];

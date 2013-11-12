@@ -70,7 +70,7 @@ class BaseHTTP
         //$type     = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
         if ($status[0] != 2) {
-            throw new \Exception($response);
+            throw new \RuntimeException($response);
         }
         return $json ? json_decode($response, true) : $response;
     }
@@ -85,7 +85,7 @@ class BaseHTTP
         return $this->execCurl($ch);
     }
 
-    protected function get($url, Array $args)
+    protected function get($url, Array $args = [])
     {
         $ch = $this->getCurl($url, $args);
         return $this->execCurl($ch, true);
