@@ -52,54 +52,6 @@ class Client extends BaseHTTP
         $this->pass = $p;
     }
 
-    protected function getCurl($url)
-    {
-        $url  = "http://{$this->host}:{$this->port}/{$url}";
-        $url .= "?" . http_build_query(['u' => $this->user, 'p' => $this->pass]);
-        $ch   = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        return $ch;
-    }
-
-    protected function execCurl($ch, $json = false)
-    {
-        $response = curl_exec ($ch);
-        $status   = (string)curl_getinfo($ch, CURLINFO_HTTP_CODE); 
-        //$type     = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        curl_close($ch);
-        if ($status[0] != 2) {
-            throw new \Exception($response);
-        }
-        return $json ? json_decode($response, true) : $response;
-    }
-
-    protected function delete($url)
-    {
-        $ch = $this->getCurl($url);
-        curl_setopt_array($ch, [
-            CURLOPT_CUSTOMREQUEST => "DELETE",
-        ]);
-
-        return $this->execCurl($ch);
-    }
-
-    protected function get($url)
-    {
-        $ch = $this->getCurl($url);
-        return $this->execCurl($ch, true);
-    }
-
-    protected function post($url, Array $body)
-    {
-        $ch = $this->getCurl($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST =>  1,
-            CURLOPT_POSTFIELDS => json_encode($body),
-        ]);
-
-        return $this->execCurl($ch);
-    }
-
     public function deleteDatabase($name)
     {
         return $this->delete("db/$name");

@@ -53,10 +53,11 @@ class BaseHTTP
         $this->host   = $c->host;
     }
 
-    protected function getCurl($url)
+    protected function getCurl($url, Array $args = [])
     {
+        $args = array_merge($args, ['u' => $this->user, 'p' => $this->pass]);
         $url  = "http://{$this->host}:{$this->port}/{$this->base}{$url}";
-        $url .= "?" . http_build_query(['u' => $this->user, 'p' => $this->pass]);
+        $url .= "?" . http_build_query($args);
         $ch   = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         return $ch;
@@ -84,9 +85,9 @@ class BaseHTTP
         return $this->execCurl($ch);
     }
 
-    protected function get($url)
+    protected function get($url, Array $args)
     {
-        $ch = $this->getCurl($url);
+        $ch = $this->getCurl($url, $args);
         return $this->execCurl($ch, true);
     }
 

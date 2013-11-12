@@ -61,6 +61,11 @@ class DB extends BaseHTTP
         return $this->post('series', [$body]);
     }
 
+    public function query($sql)
+    {
+        return $this->get('series', ['q' => $sql]);
+    }
+
     public function createUser($username, $password)
     {
         return $this->post('users', compact('username', 'password'));
