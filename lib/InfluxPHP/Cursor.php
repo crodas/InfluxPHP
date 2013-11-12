@@ -37,56 +37,19 @@
 
 namespace crodas\InfluxPHP;
 
-class DB extends BaseHTTP
+use ArrayIterator;
+
+class Cursor extends ArrayIterator
 {
-    protected $client;
-    protected $name;
-
-    public function __construct(Client $client, $name)
+    public function __construct(Array $resultset)
     {
-        $this->client = $client;
-        $this->name   = $name;
-        $this->inherits($client);
-        $this->base   = "db/$name/";
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function drop()
-    {
-        return $this->client->deleteDatabase($this->name);
-    }
-
-    public function insert($name, Array $data)
-    {
-        $points = [];
-        $first  = current($data);
-        if (!is_array($first)) {
-            return $this->insert($name, [$data]);
+        $rows = [];
+        foreach ($resultset as $set) {
+            foreach ($set['points'] as $row) {
+                $row    = (object)array_combine($set['columns'], $row);
+                $rows[] = $row;
+            }
         }
-        $columns = array_keys($first);
-        foreach ($data as $value) {
-            $points[] = array_values($value);
-        }
-        $body = compact('name', 'columns', 'points');
-        return $this->post('series', [$body]);
-    }
-
-    public function first($sql)
-    {
-        return current($this->query($sql));
-    }
-
-    public function query($sql)
-    {
-        return new Cursor($this->get('series', ['q' => $sql]));
-    }
-
-    public function createUser($username, $password)
-    {
-        return $this->post('users', compact('username', 'password'));
+        parent::__construct($rows);
     }
 }
