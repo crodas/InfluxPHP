@@ -58,9 +58,17 @@ class DBTest extends \phpunit_framework_testcase
         $db->insert("foobar", ['type' => '/barfoo', 'karma' => 30]);
 
         sleep(1);
-        $this->assertEquals($db->first("SELECT max(karma) FROM foobar;")->max, 30);
-        $this->assertEquals($db->first("SELECT min(karma) FROM foobar;")->min, 10);
-        $this->assertEquals($db->first("SELECT mean(karma) FROM foobar;")->mean, 20);
+        $this->assertEquals($db->first("SELECT max(karma) FROM foobar")->max, 30);
+        $this->assertEquals($db->first("SELECT min(karma) FROM foobar")->min, 10);
+        $this->assertEquals($db->first("SELECT mean(karma) FROM foobar")->mean, 20);
+
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+            if ($row->type == "/foobar") {
+                $this->assertEquals(15, $row->mean);
+            } else {
+                $this->assertEquals(30, $row->mean);
+            }
+        }
 
         $db->drop();
     } 
