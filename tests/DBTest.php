@@ -50,7 +50,7 @@ class DBTest extends \phpunit_framework_testcase
     public function testQuery()
     {
         $client = new Client;
-        $db = $client->createDatabase("test_" . uniqid(true));
+        $db = $client->createDatabase("test_xxx");
         $db->createUser("root", "root");
 
         $db->insert("foobar", ['type' => '/foobar', 'karma' => 10]);
