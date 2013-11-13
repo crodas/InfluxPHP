@@ -57,7 +57,6 @@ class DBTest extends \phpunit_framework_testcase
         $db->insert("foobar", ['type' => '/foobar', 'karma' => 20]);
         $db->insert("foobar", ['type' => '/barfoo', 'karma' => 30]);
 
-        sleep(1);
         $this->assertEquals($db->first("SELECT max(karma) FROM foobar")->max, 30);
         $this->assertEquals($db->first("SELECT min(karma) FROM foobar")->min, 10);
         $this->assertEquals($db->first("SELECT mean(karma) FROM foobar")->mean, 20);
