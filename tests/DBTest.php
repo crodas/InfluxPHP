@@ -87,11 +87,34 @@ class DBTest extends \phpunit_framework_testcase
         $this->assertEquals($db->first("SELECT mean(karma) FROM foobar")->mean, 20);
 
         foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+            $this->assertTrue(is_int($row->time));
             if ($row->type == "/foobar") {
                 $this->assertEquals(15, $row->mean);
             } else {
                 $this->assertEquals(30, $row->mean);
             }
+        }
+    }
+
+    /** @dependsOn testQuery */
+    function testDifferentTimePeriod()
+    {
+        $client = new Client;
+        $db = $client->test_xxx;
+
+        $client->setTimePrecision('u');
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+            $this->assertTrue($row->time > time()*1000);
+        }
+
+        $client->setTimePrecision('m');
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+            $this->assertTrue($row->time < time()*10000);
+        }
+
+        $client->setTimePrecision('s');
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+            $this->assertTrue($row->time < time()+20);
         }
 
         $db->drop();
