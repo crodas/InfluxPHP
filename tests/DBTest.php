@@ -47,6 +47,31 @@ class DBTest extends \phpunit_framework_testcase
         $client->test_xxx->drop();
     }
 
+    public function testTimePrecision()
+    {
+        $client = new Client;
+        $this->assertEquals('s', $client->getTimePrecision());
+        $db = $client->createDatabase("test_yyyy");
+        $this->assertEquals('s', $db->getTimePrecision());
+
+
+        $client->setTimePrecision('m');
+        $this->assertEquals('m', $client->getTimePrecision());
+        $this->assertEquals('m', $db->getTimePrecision());
+
+        $db1 = $client->createDatabase("test_yyyx");
+        $this->assertEquals('m', $db->getTimePrecision());
+    }
+
+    /** 
+     * @expectedException InvalidArgumentException 
+     */
+    public function testInvalidTimePrecision()
+    {
+        $client = new Client;
+        $client->SetTimePrecision([]);
+    }
+
     public function testQuery()
     {
         $client = new Client;

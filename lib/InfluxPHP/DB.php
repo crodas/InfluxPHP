@@ -82,7 +82,7 @@ class DB extends BaseHTTP
 
     public function query($sql)
     {
-        return new Cursor($this->get('series', ['q' => $sql]));
+        return new Cursor($this->get('series', ['q' => $sql, 'time_precision' => $this->timePrecision]));
     }
 
     public function createUser($username, $password)
