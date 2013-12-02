@@ -60,7 +60,7 @@ class DB extends BaseHTTP
         return $this->client->deleteDatabase($this->name);
     }
 
-    public function insert($name, Array $data)
+    public function insert($name, array $data)
     {
         $points = [];
         $first  = current($data);
@@ -72,7 +72,7 @@ class DB extends BaseHTTP
             $points[] = array_values($value);
         }
         $body = compact('name', 'columns', 'points');
-        return $this->post('series', [$body]);
+        return $this->post('series', [$body], ['time_precision' => $this->timePrecision]);
     }
 
     public function first($sql)
