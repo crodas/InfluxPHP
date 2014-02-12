@@ -64,7 +64,7 @@ class BaseHTTP
         $c->children[] = $this;
     }
 
-    protected function getCurl($url, Array $args = [])
+    protected function getCurl($url, array $args = [])
     {
         $args = array_merge($args, ['u' => $this->user, 'p' => $this->pass]);
         $url  = "http://{$this->host}:{$this->port}/{$this->base}{$url}";
@@ -77,7 +77,7 @@ class BaseHTTP
     protected function execCurl($ch, $json = false)
     {
         $response = curl_exec ($ch);
-        $status   = (string)curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        $status   = (string)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         //$type     = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
         if ($status[0] != 2) {
@@ -115,19 +115,19 @@ class BaseHTTP
             }
             return $this;
         }
-        
-        throw new \InvalidArgumentException("Expecting m,s or u");
+
+        throw new \InvalidArgumentException("Expecting s, m or u as time precision");
     }
 
-    protected function get($url, Array $args = [])
+    protected function get($url, array $args = [])
     {
         $ch = $this->getCurl($url, $args);
         return $this->execCurl($ch, true);
     }
 
-    protected function post($url, Array $body)
+    protected function post($url, array $body, array $args = [])
     {
-        $ch = $this->getCurl($url);
+        $ch = $this->getCurl($url, $args);
         curl_setopt_array($ch, [
             CURLOPT_POST =>  1,
             CURLOPT_POSTFIELDS => json_encode($body),

@@ -63,8 +63,8 @@ class DBTest extends \phpunit_framework_testcase
         $this->assertEquals('m', $db->getTimePrecision());
     }
 
-    /** 
-     * @expectedException InvalidArgumentException 
+    /**
+     * @expectedException InvalidArgumentException
      */
     public function testInvalidTimePrecision()
     {
@@ -118,5 +118,5 @@ class DBTest extends \phpunit_framework_testcase
         }
 
         $db->drop();
-    } 
+    }
 }
