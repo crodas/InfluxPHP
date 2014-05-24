@@ -37,19 +37,29 @@
 
 namespace crodas\InfluxPHP;
 
-use ArrayIterator;
-
-class Cursor extends ArrayIterator
+class Result
 {
-    public function __construct(array $resultset)
+
+    private $data;
+    private $timeSeriesName;
+
+    public function __construct(array $data, $timeSeriesName)
     {
-        $rows = [];
-        foreach ($resultset as $set) {
-            foreach ($set['points'] as $row) {
-                $row    = new Result(array_combine($set['columns'], $row), $set['name']);
-                $rows[] = $row;
-            }
-        }
-        parent::__construct($rows);
+        $this->data = $data;
+        $this->timeSeriesName = $timeSeriesName;
     }
+
+    public function getTimeSeriesName()
+    {
+        return $this->timeSeriesName;
+    }
+
+    public function __get($key)
+    {
+        if (array_key_exists($key, $this->data)) {
+            return $this->data[$key];
+        }
+        throw new \InvalidArgumentException('Missing key: ' . $key);
+    }
+
 }
