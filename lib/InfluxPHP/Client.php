@@ -43,13 +43,15 @@ class Client extends BaseHTTP
     protected $port;
     protected $user;
     protected $pass;
+    protected $ssl;
 
-    public function __construct($host = "localhost", $port = 8086, $u = 'root', $p = 'root')
+    public function __construct($host = "localhost", $port = 8086, $u = 'root', $p = 'root', $ssl = false)
     {
         $this->host = $host;
         $this->port = $port;
         $this->user = $u;
         $this->pass = $p;
+        $this->ssl  = $ssl;
     }
 
     public function deleteDatabase($name)
