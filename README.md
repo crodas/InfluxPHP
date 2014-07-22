@@ -22,7 +22,8 @@ $client = new \crodas\InfluxPHP\Client(
    "localhost" /*default*/,
    8086 /* default */,
    "root" /* by default */,
-   "root" /* by default */
+   "root" /* by default */,
+   false /* by default */
 );
 ```
 
