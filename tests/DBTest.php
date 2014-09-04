@@ -69,7 +69,7 @@ class DBTest extends \PHPUnit_Framework_TestCase
     public function testInvalidTimePrecision()
     {
         $client = new Client;
-        $client->SetTimePrecision([]);
+        $client->SetTimePrecision(array());
     }
 
     public function testQuery()
@@ -78,9 +78,9 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $db = $client->createDatabase("test_xxx");
         $db->createUser("root", "root");
 
-        $db->insert("foobar", ['type' => '/foobar', 'karma' => 10]);
-        $db->insert("foobar", ['type' => '/foobar', 'karma' => 20]);
-        $db->insert("foobar", ['type' => '/barfoo', 'karma' => 30]);
+        $db->insert("foobar", array('type' => '/foobar', 'karma' => 10));
+        $db->insert("foobar", array('type' => '/foobar', 'karma' => 20));
+        $db->insert("foobar", array('type' => '/barfoo', 'karma' => 30));
 
         $this->assertEquals($db->first("SELECT max(karma) FROM foobar")->max, 30);
         $this->assertEquals($db->first("SELECT min(karma) FROM foobar")->min, 10);
