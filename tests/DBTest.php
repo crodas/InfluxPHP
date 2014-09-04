@@ -2,7 +2,7 @@
 use crodas\InfluxPHP\Client;
 use crodas\InfluxPHP\DB;
 
-class DBTest extends \phpunit_framework_testcase
+class DBTest extends \PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
@@ -103,17 +103,17 @@ class DBTest extends \phpunit_framework_testcase
         $db = $client->test_xxx;
 
         $client->setTimePrecision('u');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time > time()*1000);
         }
 
         $client->setTimePrecision('m');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time < time()*10000);
         }
 
         $client->setTimePrecision('s');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time < time()+20);
         }
 

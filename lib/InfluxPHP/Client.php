@@ -68,7 +68,7 @@ class Client extends BaseHTTP
         $self = $this;
         return array_map(function($obj) use($self) {
             return new DB($self, $obj['name']);
-        }, $this->get('dbs'));
+        }, $this->get('db'));
     }
 
     public function getDatabase($name)
