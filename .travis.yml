@@ -2,6 +2,7 @@ language: php
 script: phpunit
 
 php:
+    - 5.3
     - 5.4
     - 5.5
 
@@ -9,4 +10,5 @@ before_script:
     - curl -s http://getcomposer.org/installer | php
     - wget http://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb
     - sudo dpkg -i influxdb_latest_amd64.deb
+    - travis_retry sudo service influxdb restart
     - php composer.phar install

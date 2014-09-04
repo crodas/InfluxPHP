@@ -2,7 +2,7 @@
 use crodas\InfluxPHP\Client;
 use crodas\InfluxPHP\DB;
 
-class DBTest extends \phpunit_framework_testcase
+class DBTest extends \PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
@@ -69,7 +69,7 @@ class DBTest extends \phpunit_framework_testcase
     public function testInvalidTimePrecision()
     {
         $client = new Client;
-        $client->SetTimePrecision([]);
+        $client->SetTimePrecision(array());
     }
 
     public function testQuery()
@@ -78,9 +78,9 @@ class DBTest extends \phpunit_framework_testcase
         $db = $client->createDatabase("test_xxx");
         $db->createUser("root", "root");
 
-        $db->insert("foobar", ['type' => '/foobar', 'karma' => 10]);
-        $db->insert("foobar", ['type' => '/foobar', 'karma' => 20]);
-        $db->insert("foobar", ['type' => '/barfoo', 'karma' => 30]);
+        $db->insert("foobar", array('type' => '/foobar', 'karma' => 10));
+        $db->insert("foobar", array('type' => '/foobar', 'karma' => 20));
+        $db->insert("foobar", array('type' => '/barfoo', 'karma' => 30));
 
         $this->assertEquals($db->first("SELECT max(karma) FROM foobar")->max, 30);
         $this->assertEquals($db->first("SELECT min(karma) FROM foobar")->min, 10);
@@ -103,17 +103,17 @@ class DBTest extends \phpunit_framework_testcase
         $db = $client->test_xxx;
 
         $client->setTimePrecision('u');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time > time()*1000);
         }
 
         $client->setTimePrecision('m');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time < time()*10000);
         }
 
         $client->setTimePrecision('s');
-        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type") as $row) {
+        foreach ($db->query("SELECT mean(karma) FROM foobar GROUP BY type, time(1h)") as $row) {
             $this->assertTrue($row->time < time()+20);
         }
 

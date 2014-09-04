@@ -64,9 +64,9 @@ class BaseHTTP
         $c->children[] = $this;
     }
 
-    protected function getCurl($url, array $args = [])
+    protected function getCurl($url, array $args = array())
     {
-        $args = array_merge($args, ['u' => $this->user, 'p' => $this->pass]);
+        $args = array_merge($args, array('u' => $this->user, 'p' => $this->pass));
         $url  = "http://{$this->host}:{$this->port}/{$this->base}{$url}";
         $url .= "?" . http_build_query($args);
         $ch   = curl_init($url);
@@ -89,9 +89,9 @@ class BaseHTTP
     protected function delete($url)
     {
         $ch = $this->getCurl($url);
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, array(
             CURLOPT_CUSTOMREQUEST => "DELETE",
-        ]);
+        ));
 
         return $this->execCurl($ch);
     }
@@ -119,19 +119,19 @@ class BaseHTTP
         throw new \InvalidArgumentException("Expecting s, m or u as time precision");
     }
 
-    protected function get($url, array $args = [])
+    protected function get($url, array $args = array())
     {
         $ch = $this->getCurl($url, $args);
         return $this->execCurl($ch, true);
     }
 
-    protected function post($url, array $body, array $args = [])
+    protected function post($url, array $body, array $args = array())
     {
         $ch = $this->getCurl($url, $args);
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, array(
             CURLOPT_POST =>  1,
             CURLOPT_POSTFIELDS => json_encode($body),
-        ]);
+        ));
 
         return $this->execCurl($ch);
     }

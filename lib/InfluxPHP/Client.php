@@ -59,7 +59,7 @@ class Client extends BaseHTTP
 
     public function createDatabase($name)
     {
-        $this->post('db', ['name' => $name]);
+        $this->post('db', array('name' => $name));
         return new DB($this, $name);
     }
 
@@ -68,7 +68,7 @@ class Client extends BaseHTTP
         $self = $this;
         return array_map(function($obj) use($self) {
             return new DB($self, $obj['name']);
-        }, $this->get('dbs'));
+        }, $this->get('db'));
     }
 
     public function getDatabase($name)
