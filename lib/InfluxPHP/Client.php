@@ -54,21 +54,27 @@ class Client extends BaseHTTP
 
     public function deleteDatabase($name)
     {
-        return $this->delete("db/$name");
+        return $this->get('query', array('q' => 'DROP DATABASE ' . $name));
     }
 
     public function createDatabase($name)
     {
-        $this->post('db', array('name' => $name));
+        $this->get('query', array('q' => 'CREATE DATABASE ' . $name));
         return new DB($this, $name);
     }
 
     public function getDatabases()
     {
-        $self = $this;
+      $self = $this;
+      $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+
+      if (isset($dbs['results'][0]['series'][0]['values'])) {
         return array_map(function($obj) use($self) {
-            return new DB($self, $obj['name']);
-        }, $this->get('db'));
+            return new DB($self, $obj[0]);
+        }, $dbs['results'][0]['series'][0]['values']);
+      }
+      return null;
+        
     }
 
     public function getDatabase($name)

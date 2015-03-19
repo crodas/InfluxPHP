@@ -70,6 +70,8 @@ class BaseHTTP
         $url  = "http://{$this->host}:{$this->port}/{$this->base}{$url}";
         $url .= "?" . http_build_query($args);
         $ch   = curl_init($url);
+        echo "final url:\n";
+        var_dump($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         return $ch;
     }

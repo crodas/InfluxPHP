@@ -47,7 +47,7 @@ class DB extends BaseHTTP
         $this->client = $client;
         $this->name   = $name;
         $this->inherits($client);
-        $this->base   = "db/$name/";
+        $this->base   = ''; 
     }
 
     public function getName()
@@ -67,12 +67,21 @@ class DB extends BaseHTTP
         if (!is_array($first)) {
             return $this->insert($name, array($data));
         }
-        $columns = array_keys($first);
-        foreach ($data as $value) {
+        $body = array('database' => $this->name);
+        $points = array('points' => $data);
+        $body = array_merge($body, $points);
+
+        //$fields = array_keys($first);
+        //var_dump(json_encode($body));
+/*        foreach ($data as $value) {
             $points[] = array_values($value);
         }
-        $body = compact('name', 'columns', 'points');
-        return $this->post('series', array($body), array('time_precision' => $this->timePrecision));
+*/
+
+  //      $body = compact('name', 'fields', 'points');
+   //     var_dump($body);
+        
+        return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
     public function first($sql)
