@@ -77,7 +77,6 @@ class DB extends BaseHTTP
             $points[] = array_values($value);
         }
 */
-
   //      $body = compact('name', 'fields', 'points');
    //     var_dump($body);
         
@@ -91,7 +90,7 @@ class DB extends BaseHTTP
 
     public function query($sql)
     {
-        return new Cursor($this->get('series', array('q' => $sql, 'time_precision' => $this->timePrecision)));
+        return new Cursor($this->get('query', array('db' => $this->name,'q' => $sql, 'time_precision' => $this->timePrecision)));
     }
 
     public function createUser($name, $password)

@@ -1,4 +1,5 @@
 <?php
+
 /*
   +---------------------------------------------------------------------------------+
   | Copyright (c) 2013 César Rodas                                                  |
@@ -33,12 +34,13 @@
   +---------------------------------------------------------------------------------+
   | Authors: César Rodas <crodas@php.net>                                           |
   +---------------------------------------------------------------------------------+
-*/
+ */
 
 namespace crodas\InfluxPHP;
 
 class Client extends BaseHTTP
 {
+
     protected $host;
     protected $port;
     protected $user;
@@ -65,16 +67,15 @@ class Client extends BaseHTTP
 
     public function getDatabases()
     {
-      $self = $this;
-      $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $self = $this;
+        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
 
-      if (isset($dbs['results'][0]['series'][0]['values'])) {
-        return array_map(function($obj) use($self) {
-            return new DB($self, $obj[0]);
-        }, $dbs['results'][0]['series'][0]['values']);
-      }
-      return null;
-        
+        if (isset($dbs['results'][0]['series'][0]['values'])) {
+            return array_map(function($obj) use($self) {
+                return new DB($self, $obj[0]);
+            }, $dbs['results'][0]['series'][0]['values']);
+        }
+        return null;
     }
 
     public function getDatabase($name)
@@ -86,5 +87,5 @@ class Client extends BaseHTTP
     {
         return new DB($this, $name);
     }
-}
 
+}

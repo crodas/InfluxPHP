@@ -44,12 +44,17 @@ class Cursor extends ArrayIterator
     public function __construct(array $resultset)
     {
         $rows = array();
-        foreach ($resultset as $set) {
-            foreach ($set['points'] as $row) {
-                $row    = (object)array_combine($set['columns'], $row);
-                $rows[] = $row;
-            }
+        if (!isset($resultset['results'][0]['series'][0])) {
+            return null;
         }
+        // maybe todo: get meta information like tags and name out of resultset
+        $resultColumns =  $resultset['results'][0]['series'][0]['columns'];
+        $resultValues =  $resultset['results'][0]['series'][0]['values'];
+        foreach ($resultValues as $row) {
+            $row    = (object)array_combine($resultColumns, $row);
+            $rows[] = $row;
+        }
+        
         parent::__construct($rows);
     }
 }
