@@ -76,7 +76,7 @@ class DBTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client;
         $db = $client->createDatabase("test_xxx");
-        $db->createUser("root", "root");
+        //$db->createUser("root", "root");
 
         $db->insert("foobar", array('type' => '/foobar', 'karma' => 10));
         $db->insert("foobar", array('type' => '/foobar', 'karma' => 20));

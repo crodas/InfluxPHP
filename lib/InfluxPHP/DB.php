@@ -93,8 +93,5 @@ class DB extends BaseHTTP
         return new Cursor($this->get('query', array('db' => $this->name,'q' => $sql, 'time_precision' => $this->timePrecision)));
     }
 
-    public function createUser($name, $password)
-    {
-        return $this->post('users', compact('name', 'password'));
-    }
+
 }

@@ -41,6 +41,13 @@ use ArrayIterator;
 
 class Cursor extends ArrayIterator
 {
+    
+    /**
+     * Constructor, create cursor, i.e. array of results
+     * 
+     * @param array $resultset
+     * @return type
+     */
     public function __construct(array $resultset)
     {
         $rows = array();
@@ -54,7 +61,6 @@ class Cursor extends ArrayIterator
             $row    = (object)array_combine($resultColumns, $row);
             $rows[] = $row;
         }
-        
         parent::__construct($rows);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . "/../vendor/autoload.php";
+require __DIR__ . "/../../../autoload.php";
 
 $client = new \crodas\InfluxPHP\Client;
 foreach ($client->getDatabases() as $db) {
