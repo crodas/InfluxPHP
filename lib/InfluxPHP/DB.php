@@ -1,4 +1,5 @@
 <?php
+
 /*
   +---------------------------------------------------------------------------------+
   | Copyright (c) 2013 César Rodas                                                  |
@@ -33,21 +34,22 @@
   +---------------------------------------------------------------------------------+
   | Authors: César Rodas <crodas@php.net>                                           |
   +---------------------------------------------------------------------------------+
-*/
+ */
 
 namespace crodas\InfluxPHP;
 
 class DB extends BaseHTTP
 {
+
     protected $client;
     protected $name;
 
     public function __construct(Client $client, $name)
     {
         $this->client = $client;
-        $this->name   = $name;
+        $this->name = $name;
         $this->inherits($client);
-        $this->base   = ''; 
+        $this->base = '';
     }
 
     public function getName()
@@ -63,23 +65,53 @@ class DB extends BaseHTTP
     public function insert($name, array $data)
     {
         $points = array();
-        $first  = current($data);
-        if (!is_array($first)) {
-            return $this->insert($name, array($data));
+        if (isset($data['name'])) {
+            $name = $data['name'];
+            unset($data['name']);
         }
+        $keys = array_keys($data);
+        var_dump($keys);
+        if (count($keys) > 1) {
+            echo "more than one!\n";
+            for ($i = 0; $i < count($keys); $i++) {
+                $elem = $data[$keys[$i]];
+                if (!isset($data[$keys[$i]]['name'])) {
+                    $data[$keys[$i]]['name'] = $name;
+                }
+                var_dump($data[$keys[$i]]);
+            }
+        } else {
+            if (!in_array(0, $keys, true)) {
+                echo "not well formed!";
+                return $this->insert($name, array($data));
+            } else {
+                echo "ok, formatted\n";
+            }
+        }
+        //$first  = current($data);
+        //if (!is_array($first)) {
+        //   return $this->insert($name, array($data));
+        // }
         $body = array('database' => $this->name);
+        var_dump($data);
+        if (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
+            $data[0]['name'] = $name;
+        }
+        var_dump(array_keys($data));
         $points = array('points' => $data);
         $body = array_merge($body, $points);
+        var_dump($body);
+        var_dump(json_encode($body));
 
         //$fields = array_keys($first);
         //var_dump(json_encode($body));
-/*        foreach ($data as $value) {
-            $points[] = array_values($value);
-        }
-*/
-  //      $body = compact('name', 'fields', 'points');
-   //     var_dump($body);
-        
+        /*        foreach ($data as $value) {
+          $points[] = array_values($value);
+          }
+         */
+        //      $body = compact('name', 'fields', 'points');
+        //     var_dump($body);
+
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
@@ -90,8 +122,7 @@ class DB extends BaseHTTP
 
     public function query($sql)
     {
-        return new Cursor($this->get('query', array('db' => $this->name,'q' => $sql, 'time_precision' => $this->timePrecision)));
+        return new Cursor($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
     }
-
 
 }
