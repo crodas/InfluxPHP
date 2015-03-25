@@ -2,7 +2,7 @@
 
 /*
   +---------------------------------------------------------------------------------+
-  | Copyright (c) 2013 César Rodas                                                  |
+  | Copyright (c) 2015 Ralf Geschke                                                |
   +---------------------------------------------------------------------------------+
   | Redistribution and use in source and binary forms, with or without              |
   | modification, are permitted provided that the following conditions are met:     |
@@ -32,7 +32,7 @@
   | (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS   |
   | SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE                     |
   +---------------------------------------------------------------------------------+
-  | Authors: César Rodas <crodas@php.net>                                           |
+  | Authors: Ralf Geschke <ralf@kuerbis.org>                                        |
   +---------------------------------------------------------------------------------+
  */
 
@@ -41,85 +41,56 @@ namespace crodas\InfluxPHP;
 use ArrayIterator;
 use ArrayObject;
 
-class Cursor extends ArrayIterator
+class ResultSeriesObject extends ArrayIterator
 {
 
+    private $name;
+    private $meta;
+
     /**
-     * Constructor, create cursor, i.e. array of results
+     * Constructor
      * 
-     * @param array $resultset
-     * @return type
+     * @param array $rows
+     * @param type $name
+     * @param type $meta
      */
-    public function __construct(array $resultset)
+    public function __construct(array $rows = array(), $name = null, $meta = null)
     {
-        $rows = array();
-        if (!isset($resultset['results'][0]['series'][0])) {
-            return null;
+        if ($name) {
+            $this->name = $name;
         }
-
-
-
-//var_dump($resultset);
-        if (isset($resultset['results'][0]['series'])) {
-            foreach ($resultset['results'][0]['series'] as $resultElem) {
-                //var_dump($resultElem);
-                $row = $this->createResultSeriesObject($resultElem);
-                var_dump($row);    
-            }
+        if ($meta) {
+            $this->meta = $meta;
         }
-        die;
-        $ao = new \ArrayObject($resultset);
-        var_dump($ao['results']);
-        var_dump($ao->count());
-        die;
-        // maybe todo: get meta information like tags and name out of resultset
-        $resultColumns = $resultset['results'][0]['series'][0]['columns'];
-        $resultValues = $resultset['results'][0]['series'][0]['values'];
-        foreach ($resultValues as $row) {
-            if (count($resultColumns) != count($row)) {
-                $diffCount = abs(count($resultColumns) - count($row));
-                $resultColumns = array_pad($resultColumns, count($row), null);
-                $row = array_pad($row, count($resultColumns), null);
-            }
+        if ($rows) {
 
-            $row = (object) array_combine($resultColumns, $row);
-            $rows[] = $row;
+            parent::__construct($rows);
         }
+    }
+
+    public function setRows(array $rows)
+    {
         parent::__construct($rows);
     }
 
-    protected function createResultSeriesObject($resultElem)
+    public function setName($name)
     {
-        // todo: create metadata stuff
-          $resultColumns = $resultElem['columns'];
-        $resultValues = $resultElem['values'];
-        unset($resultElem['columns']);
-        unset($resultElem['values']);
-        var_dump($resultElem);
-        $seriesElem = new ResultSeriesObject();
-        if (isset($resultElem['name'])) {
-            $name = $resultElem['name'];
-            unset($resultElem['name']);
-            $seriesElem->setName($name);
-            
-        }
-        if (count($resultElem)) {
-            $seriesElem->setMeta($resultElem);
-        }
-            
-        foreach ($resultValues as $row) {
-            if (count($resultColumns) != count($row)) {
-                $diffCount = abs(count($resultColumns) - count($row));
-                $resultColumns = array_pad($resultColumns, count($row), null);
-                $row = array_pad($row, count($resultColumns), null);
-            }
-
-            $row = (object) array_combine($resultColumns, $row);
-            $rows[] = $row;
-        }
-        $seriesElem->setRows($rows);
-        return $seriesElem;
-        
+        $this->name = $name;
     }
-    
+
+    public function setMeta($meta)
+    {
+        $this->meta = $meta;
+    }
+
+    public function __get($name)
+    {
+        if ($name == 'name') {
+            return $this->name;
+        } elseif (isset($this->meta[$name])) {
+            return $this->meta[$name];
+        }
+        return null;
+    }
+
 }
