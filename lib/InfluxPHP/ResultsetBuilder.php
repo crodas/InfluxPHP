@@ -2,7 +2,7 @@
 
 /*
   +---------------------------------------------------------------------------------+
-  | Copyright (c) 2015 Ralf Geschke                                                |
+  | Copyright (c) 2015 Ralf Geschke                                                 |
   +---------------------------------------------------------------------------------+
   | Redistribution and use in source and binary forms, with or without              |
   | modification, are permitted provided that the following conditions are met:     |
@@ -38,68 +38,74 @@
 
 namespace crodas\InfluxPHP;
 
-use ArrayIterator;
-
-class ResultSeriesObject extends ArrayIterator
+class ResultsetBuilder
 {
 
-    private $name;
-    private $meta;
+    /**
+     * Build a result object, dependent on the number of result series in the 
+     * submitted resultset array
+     * 
+     * @param array $resultSet
+     * @return \crodas\InfluxPHP\MultipleResultSeriesObject or \crodas\InfluxPHP\ResultSeriesObject or null
+     */
+    public static function buildResultSeries(array $resultSet)
+    {
+        $rows = array();
+        if (!isset($resultSet['results'][0]['series'][0])) {
+            return null;
+        }
+
+        if (isset($resultSet['results'][0]['series'])) {
+            foreach ($resultSet['results'][0]['series'] as $resultElem) {
+                $row = self::createResultSeriesObject($resultElem);
+                $rows[] = $row;
+            }
+        }
+        $seriesCount = count($rows);
+
+        if ($seriesCount == 1) {
+            $resultSeries = $rows[0];
+        } else {
+            $resultSeries = new MultipleResultSeriesObject($rows);
+        }
+        return $resultSeries;
+    }
 
     /**
-     * Constructor
+     * Create a ResultSeriesObject, i.e. an instance of an ArrayIterator,
+     * enhanced with meta data of InfluxDB results
      * 
-     * @param array $rows
-     * @param type $name
-     * @param type $meta
+     * @param type $resultElem
+     * @return \crodas\InfluxPHP\ResultSeriesObject
      */
-    public function __construct(array $rows = array(), $name = null, $meta = null)
+    protected static function createResultSeriesObject($resultElem)
     {
-        if ($name) {
-            $this->name = $name;
+        $resultColumns = $resultElem['columns'];
+        $resultValues = $resultElem['values'];
+        unset($resultElem['columns']);
+        unset($resultElem['values']);
+        $seriesElem = new ResultSeriesObject();
+        if (isset($resultElem['name'])) {
+            $name = $resultElem['name'];
+            unset($resultElem['name']);
+            $seriesElem->setName($name);
         }
-        if ($meta) {
-            $this->meta = $meta;
+        if (count($resultElem)) {
+            $seriesElem->setMeta($resultElem);
         }
-        if ($rows) {
 
-            parent::__construct($rows);
+        foreach ($resultValues as $row) {
+            if (count($resultColumns) != count($row)) {
+                $diffCount = abs(count($resultColumns) - count($row));
+                $resultColumns = array_pad($resultColumns, count($row), null);
+                $row = array_pad($row, count($resultColumns), null);
+            }
+
+            $row = (object) array_combine($resultColumns, $row);
+            $rows[] = $row;
         }
-    }
-
-    public function setRows(array $rows)
-    {
-        parent::__construct($rows);
-    }
-
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-    
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setMeta($meta)
-    {
-        $this->meta = $meta;
-    }
-    
-    public function getMeta()
-    {
-        return $this->meta;
-    }
-
-    public function __get($name)
-    {
-        if ($name == 'name') {
-            return $this->name;
-        } elseif (isset($this->meta[$name])) {
-            return $this->meta[$name];
-        }
-        return null;
+        $seriesElem->setRows($rows);
+        return $seriesElem;
     }
 
 }

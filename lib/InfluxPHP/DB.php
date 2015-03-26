@@ -105,7 +105,8 @@ class DB extends BaseHTTP
 
     public function query($sql)
     {
-        return new Cursor($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
+        return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
+      
     }
 
 }

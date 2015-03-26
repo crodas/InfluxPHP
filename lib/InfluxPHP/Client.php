@@ -133,14 +133,15 @@ class Client extends BaseHTTP
         return $this->get('query', array('q' => 'DROP USER ' . $name));
     }
 
+  
     /**
      * Show existing users
      * 
-     * @return \crodas\InfluxPHP\Cursor
+     * @return type ResultSeriesObject 
      */
     public function getUsers()
     {       
-        return new Cursor($this->get('query', array('q' => 'SHOW USERS')));
+        return ResultsetBuilder::buildResultSeries($this->get('query', array('q' => 'SHOW USERS')));
     }
 
     /**
