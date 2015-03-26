@@ -2,6 +2,8 @@
 
 use crodas\InfluxPHP\Client;
 use crodas\InfluxPHP\DB;
+use crodas\InfluxPHP\MultipleResultSeriesObject;
+use crodas\InfluxPHP\ResultSeriesObject;
 
 class DBTest extends \PHPUnit_Framework_TestCase
 {
@@ -78,10 +80,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client;
         $db = $client->createDatabase('test_zzz');
-        
+
         for ($i = 0; $i < 144; $i++) {
             $data = [['tags' => ['type' => $i % 2 ? 'two' : 'one'],
-                'fields' => ['value' => $i * 10,
+            'fields' => ['value' => $i * 10,
                 'type' => $i % 2 ? 'two' : 'one'],
             'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60]];
             $db->insert('test1', $data);
@@ -91,75 +93,110 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($db->first("select last(value) from test1")->last, 1430);
     }
 
-    /** @dependsOn testInsert */
+    /** @depends testInsert */
     public function testQueryAggregateCount()
     {
         $client = new Client;
-        
+
         $db = $client->test_zzz;
         $result = $db->query("SELECT count(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h)");
-        $this->assertEquals(count($result),12);
+        $this->assertEquals(count($result), 12);
         $this->assertEquals($result[0]->time, '2015-01-01T12:00:00Z');
         $this->assertEquals($result[0]->count, 6);
         $this->assertEquals($result[11]->time, '2015-01-01T23:00:00Z');
         $this->assertEquals($result[11]->count, 6);
     }
-    
-     /** @dependsOn testInsert */
+
+    /** @depends testInsert */
     public function testQueryAggregateMean()
     {
         $client = new Client;
         $db = $client->test_zzz;
         $result = $db->query("SELECT mean(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h)");
-        $this->assertEquals(count($result),12);
+        $this->assertEquals(count($result), 12);
         $this->assertEquals($result[0]->time, '2015-01-01T12:00:00Z');
         $this->assertEquals($result[0]->mean, 745);
         $this->assertEquals($result[11]->time, '2015-01-01T23:00:00Z');
         $this->assertEquals($result[11]->mean, 1405);
     }
 
-      /** @dependsOn testInsert */
+    /** @depends testInsert */
     public function testQueryAggregateSum()
     {
         $client = new Client;
         $db = $client->test_zzz;
         $result = $db->query("SELECT sum(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h)");
-        $this->assertEquals(count($result),12);
+        $this->assertEquals(count($result), 12);
         $this->assertEquals($result[0]->time, '2015-01-01T12:00:00Z');
         $this->assertEquals($result[0]->sum, 4470);
         $this->assertEquals($result[11]->time, '2015-01-01T23:00:00Z');
         $this->assertEquals($result[11]->sum, 8430);
     }
-    
-       /** @dependsOn testInsert */
+
+    /** @depends testInsert */
     public function testQueryAggregateFirst()
     {
         $client = new Client;
         $db = $client->test_zzz;
         $result = $db->query("SELECT first(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h)");
-        $this->assertEquals(count($result),12);
+        $this->assertEquals(count($result), 12);
         $this->assertEquals($result[0]->time, '2015-01-01T12:00:00Z');
         $this->assertEquals($result[0]->first, 720);
         $this->assertEquals($result[11]->time, '2015-01-01T23:00:00Z');
         $this->assertEquals($result[11]->first, 1380);
     }
-    
-       /** @dependsOn testInsert */
+
+    /** @depends testInsert */
     public function testQueryAggregateLast()
     {
         $client = new Client;
         $db = $client->test_zzz;
         $result = $db->query("SELECT last(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h)");
-        $this->assertEquals(count($result),12);
+        $this->assertEquals(count($result), 12);
         $this->assertEquals($result[0]->time, '2015-01-01T12:00:00Z');
         $this->assertEquals($result[0]->last, 770);
         $this->assertEquals($result[11]->time, '2015-01-01T23:00:00Z');
         $this->assertEquals($result[11]->last, 1430);
     }
-    
-    // SELECT count(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h), type
- 
-    
+
+
+    /** @depends testInsert */
+    public function testQueryAggregateMultipleResultSeries()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+        $result = $db->query("SELECT count(value) FROM test1 where  time >= '2015-01-01T12:00:00Z' and time < '2015-01-02T00:00:00Z' group by time(1h), type");
+        $this->assertTrue($result instanceof \crodas\InfluxPHP\MultipleResultSeriesObject);
+        $result1 = $result[0];
+        $result2 = $result[1];
+        $this->assertTrue($result1 instanceof \crodas\InfluxPHP\ResultSeriesObject);
+        $this->assertTrue($result2 instanceof \crodas\InfluxPHP\ResultSeriesObject);
+        $this->assertEquals($result1->tags['type'], 'one');
+        $this->assertEquals($result2->tags['type'], 'two');
+
+
+        $this->assertEquals(count($result1), 12);
+        $this->assertEquals($result1[0]->time, '2015-01-01T12:00:00Z');
+        $this->assertEquals($result1[0]->count, 3);
+        $this->assertEquals($result1[11]->time, '2015-01-01T23:00:00Z');
+        $this->assertEquals($result1[11]->count, 3);
+
+        $this->assertEquals(count($result2), 12);
+        $this->assertEquals($result2[0]->time, '2015-01-01T12:00:00Z');
+        $this->assertEquals($result2[0]->count, 3);
+        $this->assertEquals($result2[11]->time, '2015-01-01T23:00:00Z');
+        $this->assertEquals($result2[11]->count, 3);
+    }
+
+    /** @depends testInsert 
+     * @expectedException RuntimeException
+     */
+    public function testDatabaseExists()
+    {
+        $client = new Client;
+        $db = $client->createDatabase("test_zzz");
+    }
+
     public function lalala_testQuery()
     {
         $client = new Client;

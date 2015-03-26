@@ -62,7 +62,6 @@ class ResultSeriesObject extends ArrayIterator
             $this->meta = $meta;
         }
         if ($rows) {
-
             parent::__construct($rows);
         }
     }
@@ -76,7 +75,7 @@ class ResultSeriesObject extends ArrayIterator
     {
         $this->name = $name;
     }
-    
+
     public function getName()
     {
         return $this->name;
@@ -86,7 +85,7 @@ class ResultSeriesObject extends ArrayIterator
     {
         $this->meta = $meta;
     }
-    
+
     public function getMeta()
     {
         return $this->meta;
