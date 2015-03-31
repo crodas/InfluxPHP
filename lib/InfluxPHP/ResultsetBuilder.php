@@ -2,7 +2,7 @@
 
 /*
   +---------------------------------------------------------------------------------+
-  | Copyright (c) 2013 César Rodas                                                  |
+  | Copyright (c) 2015 Ralf Geschke                                                 |
   +---------------------------------------------------------------------------------+
   | Redistribution and use in source and binary forms, with or without              |
   | modification, are permitted provided that the following conditions are met:     |
@@ -32,81 +32,80 @@
   | (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS   |
   | SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE                     |
   +---------------------------------------------------------------------------------+
-  | Authors: César Rodas <crodas@php.net>                                           |
+  | Authors: Ralf Geschke <ralf@kuerbis.org>                                        |
   +---------------------------------------------------------------------------------+
  */
 
 namespace crodas\InfluxPHP;
 
-class DB extends BaseHTTP
+class ResultsetBuilder
 {
 
-    protected $client;
-    protected $name;
-
-    public function __construct(Client $client, $name)
+    /**
+     * Build a result object, dependent on the number of result series in the 
+     * submitted resultset array
+     * 
+     * @param array $resultSet
+     * @return \crodas\InfluxPHP\MultipleResultSeriesObject or \crodas\InfluxPHP\ResultSeriesObject or null
+     */
+    public static function buildResultSeries(array $resultSet)
     {
-        $this->client = $client;
-        $this->name = $name;
-        $this->inherits($client);
-        $this->base = '';
-    }
+        $rows = array();
+        if (!isset($resultSet['results'][0]['series'][0])) {
+            return null;
+        }
 
-    public function getName()
-    {
-        return $this->name;
-    }
+        if (isset($resultSet['results'][0]['series'])) {
+            foreach ($resultSet['results'][0]['series'] as $resultElem) {
+                $row = self::createResultSeriesObject($resultElem);
+                $rows[] = $row;
+            }
+        }
+        $seriesCount = count($rows);
 
-    public function drop()
-    {
-        return $this->client->deleteDatabase($this->name);
+        if ($seriesCount == 1) {
+            $resultSeries = $rows[0];
+        } else {
+            $resultSeries = new MultipleResultSeriesObject($rows);
+        }
+        return $resultSeries;
     }
 
     /**
-     * Insert into database
+     * Create a ResultSeriesObject, i.e. an instance of an ArrayIterator,
+     * enhanced with meta data of InfluxDB results
      * 
-     * @param type $name
-     * @param array $data
-     * @return type
+     * @param type $resultElem
+     * @return \crodas\InfluxPHP\ResultSeriesObject
      */
-    public function insert($name, array $data)
+    protected static function createResultSeriesObject($resultElem)
     {
-        $points = array();
-        if (isset($data['name'])) {
-            $name = $data['name'];
-            unset($data['name']);
+        $resultColumns = $resultElem['columns'];
+        $resultValues = $resultElem['values'];
+        unset($resultElem['columns']);
+        unset($resultElem['values']);
+        $seriesElem = new ResultSeriesObject();
+        if (isset($resultElem['name'])) {
+            $name = $resultElem['name'];
+            unset($resultElem['name']);
+            $seriesElem->setName($name);
         }
-        $keys = array_keys($data);
-        if (count($keys) > 1) { // be sure that multiple entries are well-formatted
-            for ($i = 0; $i < count($keys); $i++) {
-                $elem = $data[$keys[$i]];
-                if (!isset($data[$keys[$i]]['name'])) {
-                    $data[$keys[$i]]['name'] = $name;
-                }
-            }
-        } else {
-            if (!in_array(0, $keys, true)) {
-                return $this->insert($name, array($data));
-            } elseif (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
-                $data[0]['name'] = $name;
-            }
+        if (count($resultElem)) {
+            $seriesElem->setMeta($resultElem);
         }
-        $body = array('database' => $this->name);
 
-        $points = array('points' => $data);
-        $body = array_merge($body, $points);
-        return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
-    }
+        foreach ($resultValues as $row) {
+            if (count($resultColumns) != count($row)) {
+                $diffCount = abs(count($resultColumns) - count($row));
+                $resultColumns = array_pad($resultColumns, count($row), null);
+                $row = array_pad($row, count($resultColumns), null);
+            }
 
-    public function first($sql)
-    {
-        return current($this->query($sql));
-    }
-
-    public function query($sql)
-    {
-        return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
-      
+            $row = (object) array_combine($resultColumns, $row);
+            $rows[] = $row;
+        }
+        $seriesElem->setRows($rows);
+        return $seriesElem;
     }
 
 }

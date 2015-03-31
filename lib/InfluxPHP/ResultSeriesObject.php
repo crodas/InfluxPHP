@@ -1,7 +1,8 @@
 <?php
+
 /*
   +---------------------------------------------------------------------------------+
-  | Copyright (c) 2013 César Rodas                                                  |
+  | Copyright (c) 2015 Ralf Geschke                                                |
   +---------------------------------------------------------------------------------+
   | Redistribution and use in source and binary forms, with or without              |
   | modification, are permitted provided that the following conditions are met:     |
@@ -31,25 +32,73 @@
   | (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS   |
   | SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE                     |
   +---------------------------------------------------------------------------------+
-  | Authors: César Rodas <crodas@php.net>                                           |
+  | Authors: Ralf Geschke <ralf@kuerbis.org>                                        |
   +---------------------------------------------------------------------------------+
-*/
+ */
 
 namespace crodas\InfluxPHP;
 
 use ArrayIterator;
 
-class Cursor extends ArrayIterator
+class ResultSeriesObject extends ArrayIterator
 {
-    public function __construct(array $resultset)
+
+    private $name;
+    private $meta;
+
+    /**
+     * Constructor
+     * 
+     * @param array $rows
+     * @param type $name
+     * @param type $meta
+     */
+    public function __construct(array $rows = array(), $name = null, $meta = null)
     {
-        $rows = array();
-        foreach ($resultset as $set) {
-            foreach ($set['points'] as $row) {
-                $row    = (object)array_combine($set['columns'], $row);
-                $rows[] = $row;
-            }
+        if ($name) {
+            $this->name = $name;
         }
+        if ($meta) {
+            $this->meta = $meta;
+        }
+        if ($rows) {
+            parent::__construct($rows);
+        }
+    }
+
+    public function setRows(array $rows)
+    {
         parent::__construct($rows);
     }
+
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function setMeta($meta)
+    {
+        $this->meta = $meta;
+    }
+
+    public function getMeta()
+    {
+        return $this->meta;
+    }
+
+    public function __get($name)
+    {
+        if ($name == 'name') {
+            return $this->name;
+        } elseif (isset($this->meta[$name])) {
+            return $this->meta[$name];
+        }
+        return null;
+    }
+
 }
