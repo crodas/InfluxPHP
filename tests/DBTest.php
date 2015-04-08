@@ -8,6 +8,29 @@ use crodas\InfluxPHP\ResultSeriesObject;
 class DBTest extends \PHPUnit_Framework_TestCase
 {
 
+
+    public static function setUpBeforeClass() 
+    {
+        $client = new Client;
+        $db = $client->createDatabase('test_zzz');
+
+        for ($i = 0; $i < 144; $i++) {
+            $data = [['tags' => ['type' => $i % 2 ? 'two' : 'one'],
+            'fields' => ['value' => $i * 10,
+                'type' => $i % 2 ? 'two' : 'one'],
+            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60]];
+            $db->insert('test1', $data);
+        }
+    }
+
+    public static function tearDownAfterClass()
+    {
+          $client = new Client;
+          $db = $client->test_zzz;
+          $db->drop();
+    }
+
+
     public function testCreate()
     {
         $client = new Client;
@@ -76,24 +99,22 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $client->SetTimePrecision(array());
     }
 
+    /**
+     * @medium
+     */
     public function testInsert()
     {
         $client = new Client;
-        $db = $client->createDatabase('test_zzz');
+        $db = $client->test_zzz;
 
-        for ($i = 0; $i < 144; $i++) {
-            $data = [['tags' => ['type' => $i % 2 ? 'two' : 'one'],
-            'fields' => ['value' => $i * 10,
-                'type' => $i % 2 ? 'two' : 'one'],
-            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60]];
-            $db->insert('test1', $data);
-        }
-        usleep(500000); // hope that's enough to be all values written
         $this->assertEquals($db->first("select * from test1 where value=0")->time, '2015-01-01T00:00:00Z');
         $this->assertEquals($db->first("select last(value) from test1")->last, 1430);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateCount()
     {
         $client = new Client;
@@ -107,7 +128,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->count, 6);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateMean()
     {
         $client = new Client;
@@ -120,7 +144,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->mean, 1405);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateSum()
     {
         $client = new Client;
@@ -133,7 +160,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->sum, 8430);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateFirst()
     {
         $client = new Client;
@@ -146,7 +176,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->first, 1380);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateLast()
     {
         $client = new Client;
@@ -160,7 +193,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateMultipleResultSeries()
     {
         $client = new Client;
@@ -188,7 +224,9 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result2[11]->count, 3);
     }
 
-    /** @depends testInsert 
+    /** 
+     * @depends testInsert 
+     * @medium
      * @expectedException RuntimeException
      */
     public function testDatabaseExists()
