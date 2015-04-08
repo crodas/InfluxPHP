@@ -235,6 +235,56 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $db = $client->createDatabase("test_zzz");
     }
 
+    
+    
+    /** 
+     * @depends testDatabaseExists
+     * @medium
+     */
+    public function testDefaultRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+        $policy = $db->getRetentionPolicies();
+        $this->assertCount(1, $policy);
+        $this->assertEquals('default', $policy[0]->name);
+        $this->assertEquals(true, $policy[0]->default);
+        
+    }
+    
+    /** 
+     * @depends testDefaultRetentionPolicy
+     * @medium
+     */
+    public function testSetRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+        $result = $db->setRetentionPolicy('testpolicy','1w',1);
+        $policy = $db->getRetentionPolicies();
+        
+        $this->assertCount(2, $policy);
+        
+    }
+    
+    /** 
+     * @depends testSetRetentionPolicy
+     * @medium
+     */
+    public function testGetRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+       
+        $policy = $db->getRetentionPolicies();
+        
+        $this->assertCount(2, $policy);
+        $this->assertEquals('default', $policy[0]->name);
+        $this->assertEquals(true, $policy[0]->default);
+        $this->assertEquals('testpolicy', $policy[1]->name);
+        $this->assertEquals(false, $policy[1]->default);
+    }
+    
     public function lalala_testQuery()
     {
         $client = new Client;
