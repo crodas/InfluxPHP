@@ -82,10 +82,16 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $db = $client->createDatabase('test_zzz');
 
         for ($i = 0; $i < 144; $i++) {
-            $data = [['tags' => ['type' => $i % 2 ? 'two' : 'one'],
-            'fields' => ['value' => $i * 10,
-                'type' => $i % 2 ? 'two' : 'one'],
-            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60]];
+            $data = array(
+                array(
+                    'tags' => array('type' => $i % 2 ? 'two' : 'one'),
+            'fields' => array(
+                'value' => $i * 10,
+                'type' => $i % 2 ? 'two' : 'one'
+            ),
+            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60
+                )
+            );
             $db->insert('test1', $data);
         }
         usleep(500000); // hope that's enough to be all values written

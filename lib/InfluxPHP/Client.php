@@ -94,25 +94,25 @@ class Client extends BaseHTTP
 
     /**
      * Show existing databases
-     * 
+     *
      * @return array of DB objects or null
      */
     public function getDatabases()
     {
         $self = $this;
-        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $dbs = $this->getDatabaseNames();
 
-        if (isset($dbs['results'][0]['series'][0]['values'])) {
+        if ($dbs) {
             return array_map(function($obj) use($self) {
-                return new DB($self, $obj[0]);
-            }, $dbs['results'][0]['series'][0]['values']);
+                return new DB($self, $obj);
+            }, $dbs);
         }
         return null;
     }
 
     /**
      * Create a user
-     * 
+     *
      * @param string $name
      * @param string $password
      * @return type
@@ -203,8 +203,38 @@ class Client extends BaseHTTP
     }
 
     /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function databaseExists($name)
+    {
+        $databases = $this->getDatabaseNames();
+
+        return in_array($name, $databases);
+    }
+
+    /**
+     * @return array
+     */
+    public function getDatabaseNames()
+    {
+        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $result = array();
+
+
+        if (isset($dbs['results'][0]['series'][0]['values'])) {
+            foreach ($dbs['results'][0]['series'][0]['values'] as $record) {
+                $result[] = $record[0];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Shortcut for getDatabase
-     * 
+     *
      * @see getDatabase()
      * @param type $name
      * @return \crodas\InfluxPHP\DB
