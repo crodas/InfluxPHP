@@ -47,7 +47,7 @@ class Client extends BaseHTTP
     const PRIV_READ = 'READ';
 
     /**
-     * WRITE privilege 
+     * WRITE privilege
      */
     const PRIV_WRITE = 'WRITE';
 
@@ -71,7 +71,7 @@ class Client extends BaseHTTP
 
     /**
      * Delete a database
-     * 
+     *
      * @param string $name
      * @return type
      */
@@ -82,14 +82,19 @@ class Client extends BaseHTTP
 
     /**
      * Create a database and return DB instance
-     * 
+     *
      * @param string $name
      * @return \crodas\InfluxPHP\DB
      */
     public function createDatabase($name)
     {
         $this->get('query', array('q' => 'CREATE DATABASE ' . $name));
-        return new DB($this, $name);
+        $newDatabase = new DB($this, $name);
+
+        // set the default retention policy
+        $newDatabase->alterRetentionPolicy();
+
+        return $newDatabase;
     }
 
     /**
@@ -124,7 +129,7 @@ class Client extends BaseHTTP
 
     /**
      * Delete a user
-     * 
+     *
      * @param string $name
      * @return type
      */
@@ -133,20 +138,20 @@ class Client extends BaseHTTP
         return $this->get('query', array('q' => 'DROP USER ' . $name));
     }
 
-  
+
     /**
      * Show existing users
-     * 
-     * @return type ResultSeriesObject 
+     *
+     * @return type ResultSeriesObject
      */
     public function getUsers()
-    {       
+    {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('q' => 'SHOW USERS')));
     }
 
     /**
      * Privilege control - grant privilege
-     * 
+     *
      * @param string $privilege, it is recommended to user the PRIV_* constants
      * @param type $database
      * @param type $user
@@ -158,7 +163,7 @@ class Client extends BaseHTTP
 
     /**
      * Privilege control - revoke privilege
-     * 
+     *
      * @param string $privilege
      * @param string $database
      * @param string $user
@@ -171,7 +176,7 @@ class Client extends BaseHTTP
 
     /**
      * Set the cluster administrator
-     * 
+     *
      * @param string $user
      * @return type
      */
@@ -182,7 +187,7 @@ class Client extends BaseHTTP
 
     /**
      * Revoke cluster administration privilege
-     * 
+     *
      * @param string $user
      * @return type
      */
@@ -192,8 +197,8 @@ class Client extends BaseHTTP
     }
 
     /**
-     * Get database 
-     * 
+     * Get database
+     *
      * @param type $name
      * @return \crodas\InfluxPHP\DB
      */

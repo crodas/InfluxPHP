@@ -11,6 +11,7 @@
     ],
     "minimum-stability": "dev",
     "autoload": {
-        "classmap":["lib/"]
+        "classmap":["lib/"],
+        "psr-4": { "InfluxPHP\\tests\\": "tests/" }
     }
 }

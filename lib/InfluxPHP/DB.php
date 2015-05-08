@@ -64,7 +64,7 @@ class DB extends BaseHTTP
 
     /**
      * Insert into database
-     * 
+     *
      * @param type $name
      * @param array $data
      * @return type
@@ -95,6 +95,7 @@ class DB extends BaseHTTP
 
         $points = array('points' => $data);
         $body = array_merge($body, $points);
+
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
@@ -103,10 +104,37 @@ class DB extends BaseHTTP
         return current($this->query($sql));
     }
 
+    /**
+     * Alters the retention policy of the database
+     *
+     * @param string $policyName        Name of the policy (default is created with every DB)
+     * @param string $duration          Retention policy duration
+     * @param int    $replicationFactor Set the replication factor
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function alterRetentionPolicy($policyName = 'default', $duration = '7d', $replicationFactor = 2)
+    {
+
+        if (!preg_match('/(inf|\d+[m|d|w])/i', $duration)) {
+            throw new Exception(sprintf('%s is not a valid retention policy duration', $duration));
+        }
+
+        if (!is_numeric($replicationFactor)) {
+            throw new Exception(sprintf('Replication factor %s is not a valid number', $replicationFactor));
+        }
+
+        return($this->get('query',
+            array('q' => sprintf('ALTER RETENTION POLICY "%s" on "%s" DURATION %s REPLICATION %s',
+                $policyName, $this->name, $duration, $replicationFactor))
+        ));
+    }
+
     public function query($sql)
     {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
-      
+
     }
 
 }

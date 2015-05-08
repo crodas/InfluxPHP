@@ -149,4 +149,16 @@ $result = $db->query("SELECT count(value) FROM test1 where  time >= '2015-01-01T
 ```
 
 
-Please have a look at the DBTest.php class, you will find some more examples there. 
+Please have a look at the DBTest.php class, you will find some more examples there.
+ 
+Tests
+=====
+
+Tests can be run by executing phpunit in the root folder of this project.
+
+If you want to run the test to use a different influxDB host or cluster set the INFLUXDB_HOST environmental variable 
+prior to executing the tests.
+
+```
+ export INFLUXDB_HOST=10.0.0.15; phpunit
+```
