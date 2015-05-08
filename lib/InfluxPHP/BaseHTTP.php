@@ -125,7 +125,7 @@ class BaseHTTP
         return $this->execCurl($ch, true);
     }
 
-    
+
     protected function post($url, array $body, array $args = array())
     {
         $ch = $this->getCurl($url, $args);
