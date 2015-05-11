@@ -190,7 +190,8 @@ class Client extends BaseHTTP
     {
         return($this->get('query', array('q' => 'REVOKE ALL PRIVILEGES FROM ' . $user)));
     }
-
+    
+    
     /**
      * Get database 
      * 
@@ -201,7 +202,7 @@ class Client extends BaseHTTP
     {
         return new DB($this, $name);
     }
-
+    
     /**
      * Shortcut for getDatabase
      * 
