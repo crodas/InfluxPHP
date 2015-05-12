@@ -100,14 +100,44 @@ class Client extends BaseHTTP
     public function getDatabases()
     {
         $self = $this;
-        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $dbs = $this->getDatabaseNames();
 
-        if (isset($dbs['results'][0]['series'][0]['values'])) {
+        if ($dbs) {
             return array_map(function($obj) use($self) {
-                return new DB($self, $obj[0]);
-            }, $dbs['results'][0]['series'][0]['values']);
+                return new DB($self, $obj);
+            }, $dbs);
         }
         return null;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function databaseExists($name)
+    {
+        $databases = $this->getDatabaseNames();
+
+        return in_array($name, $databases);
+    }
+
+    /**
+     * @return array
+     */
+    public function getDatabaseNames()
+    {
+        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $result = array();
+
+
+        if (isset($dbs['results'][0]['series'][0]['values'])) {
+            foreach ($dbs['results'][0]['series'][0]['values'] as $record) {
+                $result[] = $record[0];
+            }
+        }
+
+        return $result;
     }
 
     /**
