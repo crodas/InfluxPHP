@@ -44,6 +44,10 @@ class DB extends BaseHTTP
     protected $client;
     protected $name;
 
+    /**
+     * @param Client $client
+     * @param string $name
+     */
     public function __construct(Client $client, $name)
     {
         $this->client = $client;
@@ -54,7 +58,7 @@ class DB extends BaseHTTP
 
     /**
      * Get database name
-     * 
+     *
      * @return string
      */
     public function getName()
@@ -64,8 +68,8 @@ class DB extends BaseHTTP
 
     /**
      * Drop database
-     * 
-     * @return type
+     *
+     * @return array|null
      */
     public function drop()
     {
@@ -74,14 +78,13 @@ class DB extends BaseHTTP
 
     /**
      * Insert into database
-     * 
-     * @param type $name
-     * @param array $data
-     * @return type
+     *
+     * @param string $name
+     * @param array  $data
+     * @return array|null
      */
     public function insert($name, array $data)
     {
-        $points = array();
         if (isset($data['name'])) {
             $name = $data['name'];
             unset($data['name']);
@@ -89,7 +92,6 @@ class DB extends BaseHTTP
         $keys = array_keys($data);
         if (count($keys) > 1) { // be sure that multiple entries are well-formatted
             for ($i = 0; $i < count($keys); $i++) {
-                $elem = $data[$keys[$i]];
                 if (!isset($data[$keys[$i]]['name'])) {
                     $data[$keys[$i]]['name'] = $name;
                 }
@@ -110,9 +112,9 @@ class DB extends BaseHTTP
 
     /**
      * Get first element of query resultset
-     * 
+     *
      * @param string $sql
-     * @return type
+     * @return array|null
      */
     public function first($sql)
     {
@@ -120,25 +122,25 @@ class DB extends BaseHTTP
     }
 
     /**
-     * Query database and get resultset 
-     * 
+     * Query database and get resultset
+     *
      * @param string $sql
-     * @return type
+     * @return array|null
      */
     public function query($sql)
     {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
-      
+
     }
-    
+
     /**
      * Create retention policy of a database
-     * 
-     * @param type $name
-     * @param type $duration
-     * @param type $replication
-     * @param bool $default
-     * @return type
+     *
+     * @param string $name
+     * @param int    $duration
+     * @param int    $replication
+     * @param bool   $default
+     * @return array|null
      */
     public function setRetentionPolicy($name, $duration, $replication, $default = false)
     {
@@ -148,34 +150,34 @@ class DB extends BaseHTTP
 
     /**
      * Modify the retention policy of a database
-     * 
-     * @param type $name
-     * @param type $duration
-     * @param type $replication
-     * @param book $default
-     * @return type
+     *
+     * @param string $name
+     * @param int    $duration
+     * @param int    $replication
+     * @param bool   $default
+     * @return array|null
      */
-    public function modifyRetentionPolicy($name, $duration=null, $replication=null, $default = false)
+    public function modifyRetentionPolicy($name, $duration = null, $replication = null, $default = false)
     {
-        // the parameters are optional, so don't set if null is submitted. In any other case, change the values. 
-        $query = 'ALTER RETENTION POLICY ' . $name . ' ON ' . $this->name .  
-                ($duration !== null ? ' DURATION ' . $duration : '') . 
-                ($replication !== null ? ' REPLICATION ' . $replication : '') . 
+        // the parameters are optional, so don't set if null is submitted. In any other case, change the values.
+        $query = 'ALTER RETENTION POLICY ' . $name . ' ON ' . $this->name .
+                ($duration !== null ? ' DURATION ' . $duration : '') .
+                ($replication !== null ? ' REPLICATION ' . $replication : '') .
                 ($default === true ? ' DEFAULT' : '');
         return $this->query($query);
     }
 
-    
+
     /**
      * Show retention policies from database
-     * 
-     * @return type
+     *
+     * @return array|null
      */
     public function getRetentionPolicies()
     {
         return($this->query('SHOW RETENTION POLICIES ' . $this->name));
     }
-    
-    
-    
+
+
+
 }
