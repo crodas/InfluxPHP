@@ -27,7 +27,6 @@ class QueryBuilder extends BaseHTTP
     protected $where = array();
     protected $startTime = null;
     protected $endTime = null;
-    protected $aggregate = false;
     protected $metric = null;
 
     /**
@@ -58,14 +57,12 @@ class QueryBuilder extends BaseHTTP
      * $series->select('sum(value)',
      *
      * @param string $customSelect
-     * @param bool   $aggregate
      *
      * @return $this
      */
-    public function select($customSelect, $aggregate = false)
+    public function select($customSelect)
     {
         $this->selection = $customSelect;
-        $this->aggregate = $aggregate;
 
         return $this;
     }
@@ -93,7 +90,6 @@ class QueryBuilder extends BaseHTTP
     public function selectAll()
     {
         $this->selection = '*';
-        $this->aggregate = false;
 
         return $this;
     }
