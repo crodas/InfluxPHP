@@ -9,6 +9,6 @@ php:
 before_script:
     - curl -s http://getcomposer.org/installer | php
     - wget http://get.influxdb.org/influxdb_0.9.0-rc29_amd64.deb
-    - sudo dpkg -i influxdb_0.9.0-rc17_amd64.deb
+    - sudo dpkg -i influxdb_0.9.0-rc29_amd64.deb
     - travis_retry sudo service influxdb restart
     - php composer.phar install
