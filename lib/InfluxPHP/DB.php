@@ -85,28 +85,29 @@ class DB extends BaseHTTP
      */
     public function insert($name, array $data)
     {
-        if (isset($data['name'])) {
-            $name = $data['name'];
-            unset($data['name']);
+        if (isset($data['measurement'])) {
+            $name = $data['measurement'];
+            unset($data['measurement']);
         }
         $keys = array_keys($data);
         if (count($keys) > 1) { // be sure that multiple entries are well-formatted
             for ($i = 0; $i < count($keys); $i++) {
-                if (!isset($data[$keys[$i]]['name'])) {
-                    $data[$keys[$i]]['name'] = $name;
+                if (!isset($data[$keys[$i]]['measurement'])) {
+                    $data[$keys[$i]]['measurement'] = $name;
                 }
             }
         } else {
             if (!in_array(0, $keys, true)) {
                 return $this->insert($name, array($data));
-            } elseif (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
-                $data[0]['name'] = $name;
+            } elseif (!isset($data[0]['measurement'])) { // don't overwrite identifier name if submitted in data array
+                $data[0]['measurement'] = $name;
             }
         }
         $body = array('database' => $this->name);
 
         $points = array('points' => $data);
         $body = array_merge($body, $points);
+
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
@@ -178,6 +179,30 @@ class DB extends BaseHTTP
         return($this->query('SHOW RETENTION POLICIES ' . $this->name));
     }
 
+    /**
+     * Creates a single metric record
+     *
+     * @param string     $name
+     * @param float      $metric
+     * @param string|int $timestamp
+     * @param array      $tags
+     *
+     * @return array
+     */
+    public static function createMetricRecord($name, $metric, $timestamp, array $tags = array())
+    {
+        // convert the timestamp to the proper format
+        $timestamp = new \DateTime($timestamp);
+        $timestamp = $timestamp->format(\DateTime::RFC3339);
 
+        return array(
+            'measurement' => $name,
+            'tags' => $tags,
+            'timestamp' => $timestamp,
+            'fields' => array(
+                'value' => (float) $metric
+            )
+        );
+    }
 
 }
