@@ -47,7 +47,7 @@ class Client extends BaseHTTP
     const PRIV_READ = 'READ';
 
     /**
-     * WRITE privilege 
+     * WRITE privilege
      */
     const PRIV_WRITE = 'WRITE';
 
@@ -71,9 +71,9 @@ class Client extends BaseHTTP
 
     /**
      * Delete a database
-     * 
+     *
      * @param string $name
-     * @return type
+     * @return array|null
      */
     public function deleteDatabase($name)
     {
@@ -82,7 +82,7 @@ class Client extends BaseHTTP
 
     /**
      * Create a database and return DB instance
-     * 
+     *
      * @param string $name
      * @return \crodas\InfluxPHP\DB
      */
@@ -94,28 +94,58 @@ class Client extends BaseHTTP
 
     /**
      * Show existing databases
-     * 
+     *
      * @return array of DB objects or null
      */
     public function getDatabases()
     {
         $self = $this;
-        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $dbs = $this->getDatabaseNames();
 
-        if (isset($dbs['results'][0]['series'][0]['values'])) {
+        if ($dbs) {
             return array_map(function($obj) use($self) {
-                return new DB($self, $obj[0]);
-            }, $dbs['results'][0]['series'][0]['values']);
+                return new DB($self, $obj);
+            }, $dbs);
         }
         return null;
     }
 
     /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function databaseExists($name)
+    {
+        $databases = $this->getDatabaseNames();
+
+        return in_array($name, $databases);
+    }
+
+    /**
+     * @return array
+     */
+    public function getDatabaseNames()
+    {
+        $dbs = $this->get('query', array('q' => 'SHOW DATABASES'));
+        $result = array();
+
+
+        if (isset($dbs['results'][0]['series'][0]['values'])) {
+            foreach ($dbs['results'][0]['series'][0]['values'] as $record) {
+                $result[] = $record[0];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Create a user
-     * 
+     *
      * @param string $name
      * @param string $password
-     * @return type
+     * @return array|null
      */
     public function createUser($name, $password)
     {
@@ -124,32 +154,34 @@ class Client extends BaseHTTP
 
     /**
      * Delete a user
-     * 
+     *
      * @param string $name
-     * @return type
+     * @return array|null
      */
     public function deleteUser($name)
     {
         return $this->get('query', array('q' => 'DROP USER ' . $name));
     }
 
-  
+
     /**
      * Show existing users
-     * 
-     * @return type ResultSeriesObject 
+     *
+     * @return ResultSeriesObject
      */
     public function getUsers()
-    {       
+    {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('q' => 'SHOW USERS')));
     }
 
     /**
      * Privilege control - grant privilege
-     * 
-     * @param string $privilege, it is recommended to user the PRIV_* constants
-     * @param type $database
-     * @param type $user
+     *
+     * @param string $privilege , it is recommended to user the PRIV_* constants
+     * @param string $database
+     * @param string $user
+     *
+     * @return mixed
      */
     public function grantPrivilege($privilege, $database, $user)
     {
@@ -158,11 +190,11 @@ class Client extends BaseHTTP
 
     /**
      * Privilege control - revoke privilege
-     * 
+     *
      * @param string $privilege
      * @param string $database
      * @param string $user
-     * @return type
+     * @return array|null
      */
     public function revokePrivilege($privilege, $database, $user)
     {
@@ -171,9 +203,9 @@ class Client extends BaseHTTP
 
     /**
      * Set the cluster administrator
-     * 
+     *
      * @param string $user
-     * @return type
+     * @return array|null
      */
     public function setAdmin($user)
     {
@@ -182,32 +214,32 @@ class Client extends BaseHTTP
 
     /**
      * Revoke cluster administration privilege
-     * 
+     *
      * @param string $user
-     * @return type
+     * @return array|null
      */
     public function deleteAdmin($user)
     {
         return($this->get('query', array('q' => 'REVOKE ALL PRIVILEGES FROM ' . $user)));
     }
-    
-    
+
+
     /**
-     * Get database 
-     * 
-     * @param type $name
+     * Get database
+     *
+     * @param string $name
      * @return \crodas\InfluxPHP\DB
      */
     public function getDatabase($name)
     {
         return new DB($this, $name);
     }
-    
+
     /**
      * Shortcut for getDatabase
-     * 
+     *
      * @see getDatabase()
-     * @param type $name
+     * @param string $name
      * @return \crodas\InfluxPHP\DB
      */
     public function __get($name)
