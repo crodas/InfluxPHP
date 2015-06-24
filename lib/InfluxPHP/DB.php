@@ -52,11 +52,21 @@ class DB extends BaseHTTP
         $this->base = '';
     }
 
+    /**
+     * Get database name
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * Drop database
+     * 
+     * @return type
+     */
     public function drop()
     {
         return $this->client->deleteDatabase($this->name);
@@ -98,15 +108,74 @@ class DB extends BaseHTTP
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
+    /**
+     * Get first element of query resultset
+     * 
+     * @param string $sql
+     * @return type
+     */
     public function first($sql)
     {
         return current($this->query($sql));
     }
 
+    /**
+     * Query database and get resultset 
+     * 
+     * @param string $sql
+     * @return type
+     */
     public function query($sql)
     {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
       
     }
+    
+    /**
+     * Create retention policy of a database
+     * 
+     * @param type $name
+     * @param type $duration
+     * @param type $replication
+     * @param bool $default
+     * @return type
+     */
+    public function setRetentionPolicy($name, $duration, $replication, $default = false)
+    {
+        $query = 'CREATE RETENTION POLICY ' . $name . ' ON ' . $this->name . ' DURATION ' . $duration . ' REPLICATION ' . $replication . ($default ? ' DEFAULT' : '');
+        return $this->query($query);
+    }
 
+    /**
+     * Modify the retention policy of a database
+     * 
+     * @param type $name
+     * @param type $duration
+     * @param type $replication
+     * @param book $default
+     * @return type
+     */
+    public function modifyRetentionPolicy($name, $duration=null, $replication=null, $default = false)
+    {
+        // the parameters are optional, so don't set if null is submitted. In any other case, change the values. 
+        $query = 'ALTER RETENTION POLICY ' . $name . ' ON ' . $this->name .  
+                ($duration !== null ? ' DURATION ' . $duration : '') . 
+                ($replication !== null ? ' REPLICATION ' . $replication : '') . 
+                ($default === true ? ' DEFAULT' : '');
+        return $this->query($query);
+    }
+
+    
+    /**
+     * Show retention policies from database
+     * 
+     * @return type
+     */
+    public function getRetentionPolicies()
+    {
+        return($this->query('SHOW RETENTION POLICIES ' . $this->name));
+    }
+    
+    
+    
 }
