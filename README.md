@@ -27,7 +27,7 @@ With InfluxDB 0.9 and above:
 ```json
 {
     "require": {
-        "crodas/influx-php": "~0.2.*"
+        "crodas/influx-php": "^0.9"
     }
 }
 ```
