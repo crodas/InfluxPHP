@@ -18,7 +18,7 @@ class DBTest extends \PHPUnit_Framework_TestCase
             $data = array(array('tags' => array('type' => $i % 2 ? 'two' : 'one'),
             'fields' => array('value' => $i * 10,
                 'type' => $i % 2 ? 'two' : 'one'),
-            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60));
+            'time' => date("c", strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60)));
             $db->insert('test1', $data);
         }
     }
@@ -37,29 +37,7 @@ class DBTest extends \PHPUnit_Framework_TestCase
         return $client->createDatabase("test_foobar");
     }
 
-    /**
-     *  @expectedException RuntimeException
-     */
-    public function testCreateException()
-    {
-        $client = new Client;
-        return $client->createDatabase("test_foobar");
-    }
-
-    /**
-     *  @dependsOn testCreateException
-     */
     public function testDelete()
-    {
-        $client = new Client;
-        return $client->deleteDatabase("test_foobar");
-    }
-
-    /**
-     *  @dependsOn testDelete
-     *  @expectedException RuntimeException
-     */
-    public function testDeleteException()
     {
         $client = new Client;
         return $client->deleteDatabase("test_foobar");
@@ -224,21 +202,8 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result2[11]->count, 3);
     }
 
-    /** 
-     * @depends testInsert 
-     * @medium
-     * @expectedException RuntimeException
-     */
-    public function testDatabaseExists()
-    {
-        $client = new Client;
-        $db = $client->createDatabase("test_zzz");
-    }
-
-    
     
     /** 
-     * @depends testDatabaseExists
      * @medium
      */
     public function testDefaultRetentionPolicy()

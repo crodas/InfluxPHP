@@ -102,6 +102,9 @@ class DB extends BaseHTTP
             }
         }
         $body = array('database' => $this->name);
+        foreach ($data as $id => $val) {
+            $data[$id]["measurement"] = $name;
+        }
 
         $points = array('points' => $data);
         $body = array_merge($body, $points);

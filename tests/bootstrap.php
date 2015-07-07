@@ -6,7 +6,7 @@ $client = new \crodas\InfluxPHP\Client;
 
 $dbs = $client->getDatabases();
 if ($dbs) {
-	foreach ($dbs as $db) {
+	foreach ((array)$dbs as $db) {
     	if (preg_match("/^test_/", $db->getName())) {
     		$db->drop();
     	}
