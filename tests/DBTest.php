@@ -8,6 +8,29 @@ use crodas\InfluxPHP\ResultSeriesObject;
 class DBTest extends \PHPUnit_Framework_TestCase
 {
 
+
+    public static function setUpBeforeClass() 
+    {
+        $client = new Client;
+        $db = $client->createDatabase('test_zzz');
+
+        for ($i = 0; $i < 144; $i++) {
+            $data = array(array('tags' => array('type' => $i % 2 ? 'two' : 'one'),
+            'fields' => array('value' => $i * 10,
+                'type' => $i % 2 ? 'two' : 'one'),
+            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60));
+            $db->insert('test1', $data);
+        }
+    }
+
+    public static function tearDownAfterClass()
+    {
+          $client = new Client;
+          $db = $client->test_zzz;
+          $db->drop();
+    }
+
+
     public function testCreate()
     {
         $client = new Client;
@@ -76,24 +99,22 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $client->SetTimePrecision(array());
     }
 
+    /**
+     * @medium
+     */
     public function testInsert()
     {
         $client = new Client;
-        $db = $client->createDatabase('test_zzz');
+        $db = $client->test_zzz;
 
-        for ($i = 0; $i < 144; $i++) {
-            $data = [['tags' => ['type' => $i % 2 ? 'two' : 'one'],
-            'fields' => ['value' => $i * 10,
-                'type' => $i % 2 ? 'two' : 'one'],
-            'timestamp' => strtotime("2015-01-01T00:00:00Z") + $i * 10 * 60]];
-            $db->insert('test1', $data);
-        }
-        usleep(500000); // hope that's enough to be all values written
         $this->assertEquals($db->first("select * from test1 where value=0")->time, '2015-01-01T00:00:00Z');
         $this->assertEquals($db->first("select last(value) from test1")->last, 1430);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateCount()
     {
         $client = new Client;
@@ -107,7 +128,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->count, 6);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateMean()
     {
         $client = new Client;
@@ -120,7 +144,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->mean, 1405);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateSum()
     {
         $client = new Client;
@@ -133,7 +160,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->sum, 8430);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateFirst()
     {
         $client = new Client;
@@ -146,7 +176,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result[11]->first, 1380);
     }
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateLast()
     {
         $client = new Client;
@@ -160,7 +193,10 @@ class DBTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /** @depends testInsert */
+    /** 
+      * @depends testInsert 
+      * @medium
+    */
     public function testQueryAggregateMultipleResultSeries()
     {
         $client = new Client;
@@ -188,7 +224,9 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result2[11]->count, 3);
     }
 
-    /** @depends testInsert 
+    /** 
+     * @depends testInsert 
+     * @medium
      * @expectedException RuntimeException
      */
     public function testDatabaseExists()
@@ -197,6 +235,56 @@ class DBTest extends \PHPUnit_Framework_TestCase
         $db = $client->createDatabase("test_zzz");
     }
 
+    
+    
+    /** 
+     * @depends testDatabaseExists
+     * @medium
+     */
+    public function testDefaultRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+        $policy = $db->getRetentionPolicies();
+        $this->assertCount(1, $policy);
+        $this->assertEquals('default', $policy[0]->name);
+        $this->assertEquals(true, $policy[0]->default);
+        
+    }
+    
+    /** 
+     * @depends testDefaultRetentionPolicy
+     * @medium
+     */
+    public function testSetRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+        $result = $db->setRetentionPolicy('testpolicy','1w',1);
+        $policy = $db->getRetentionPolicies();
+        
+        $this->assertCount(2, $policy);
+        
+    }
+    
+    /** 
+     * @depends testSetRetentionPolicy
+     * @medium
+     */
+    public function testGetRetentionPolicy()
+    {
+        $client = new Client;
+        $db = $client->test_zzz;
+       
+        $policy = $db->getRetentionPolicies();
+        
+        $this->assertCount(2, $policy);
+        $this->assertEquals('default', $policy[0]->name);
+        $this->assertEquals(true, $policy[0]->default);
+        $this->assertEquals('testpolicy', $policy[1]->name);
+        $this->assertEquals(false, $policy[1]->default);
+    }
+    
     public function lalala_testQuery()
     {
         $client = new Client;
