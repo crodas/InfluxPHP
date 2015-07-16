@@ -81,9 +81,14 @@ class ResultsetBuilder
     protected static function createResultSeriesObject($resultElem)
     {
         $resultColumns = $resultElem['columns'];
-        $resultValues = $resultElem['values'];
         unset($resultElem['columns']);
-        unset($resultElem['values']);
+        
+        $resultValues = array();
+        if (array_key_exists('values', $resultElem)) {
+        	$resultValues = $resultElem['values'];
+        	unset($resultElem['values']);
+        }
+        
         $seriesElem = new ResultSeriesObject();
         if (isset($resultElem['name'])) {
             $name = $resultElem['name'];
@@ -93,16 +98,19 @@ class ResultsetBuilder
         if (count($resultElem)) {
             $seriesElem->setMeta($resultElem);
         }
-
-        foreach ($resultValues as $row) {
-            if (count($resultColumns) != count($row)) {
-                $diffCount = abs(count($resultColumns) - count($row));
-                $resultColumns = array_pad($resultColumns, count($row), null);
-                $row = array_pad($row, count($resultColumns), null);
-            }
-
-            $row = (object) array_combine($resultColumns, $row);
-            $rows[] = $row;
+		
+        $rows = array();
+        if (count($resultValues) > 0) {
+	        foreach ($resultValues as $row) {
+	            if (count($resultColumns) != count($row)) {
+	                $diffCount = abs(count($resultColumns) - count($row));
+	                $resultColumns = array_pad($resultColumns, count($row), null);
+	                $row = array_pad($row, count($resultColumns), null);
+	            }
+	
+	            $row = (object) array_combine($resultColumns, $row);
+	            $rows[] = $row;
+	        }
         }
         $seriesElem->setRows($rows);
         return $seriesElem;
