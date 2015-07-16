@@ -82,23 +82,22 @@ class DB extends BaseHTTP
     public function insert($name, array $data)
     {
         $points = array();
-        if (isset($data['name'])) {
-            $name = $data['name'];
-            unset($data['name']);
+        if (isset($data['measurement'])) {
+            $name = $data['measurement'];
+            unset($data['measurement']);
         }
         $keys = array_keys($data);
         if (count($keys) > 1) { // be sure that multiple entries are well-formatted
             for ($i = 0; $i < count($keys); $i++) {
-                $elem = $data[$keys[$i]];
-                if (!isset($data[$keys[$i]]['name'])) {
-                    $data[$keys[$i]]['name'] = $name;
+                if (!isset($data[$keys[$i]]['measurement'])) {
+                    $data[$keys[$i]]['measurement'] = $name;
                 }
             }
         } else {
             if (!in_array(0, $keys, true)) {
                 return $this->insert($name, array($data));
-            } elseif (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
-                $data[0]['name'] = $name;
+            } elseif (!isset($data[0]['measurement'])) { // don't overwrite identifier name if submitted in data array
+                $data[0]['measurement'] = $name;
             }
         }
         $body = array('database' => $this->name);
