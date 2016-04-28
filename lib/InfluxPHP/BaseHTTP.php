@@ -140,40 +140,38 @@ class BaseHTTP
     }
 
     protected function serializeBody(array $body) {
-	if (isset($body['tags'])) {
-		// Only one measurement
-		$str = $this->serializeMeasurement($body['measurement'], $body);
-	} else {
-		$str = '';
-		$measurement = $body['measurement'];
-		unset($body['measurement']);
-		foreach ($body as $meas) {
-			$str .= $this->serializeMeasurement($measurement, $meas);
-		}
-	}
+    if (isset($body['tags'])) {
+        // Only one measurement
+        $str = $this->serializeMeasurement($body);
+    } else {
+        $str = '';
+        unset($body['database']);
+        foreach ($body as $meas) {
+            $str .= $this->serializeBody($meas);
+        }
+    }
         return $str;
     }
 
-    protected function serializeMeasurement($measurement, array $body) {
-	$str = $measurement . ',';
-	if (isset($body['tags'])) {
-		$str .= implode(',', array_map(
-                	function ($v, $k) { return $k . '=' . $v; },
-                	$body['tags'], array_keys($body['tags'])));
-	}
-	$str .= ' ';
-	if (isset($body['fields'])) {
-        	$str .= implode(',', array_map(
-                	function ($v, $k) { return $k . '=' . (is_numeric($v) ? $v : ('"' . $v . '"')); },
-                	$body['fields'], array_keys($body['fields'])));
-	}
+    protected function serializeMeasurement(array $body) {
+        $str = $body["measurement"] . ',';
+        if (isset($body['tags'])) {
+            $str .= implode(',', array_map(
+                    function ($v, $k) { return $k . '=' . $v; },
+                    $body['tags'], array_keys($body['tags'])));
+        }
+        $str .= ' ';
+        if (isset($body['fields'])) {
+            $str .= implode(',', array_map(
+                    function ($v, $k) { return $k . '=' . (is_numeric($v) ? $v : ('"' . $v . '"')); },
+                    $body['fields'], array_keys($body['fields'])));
+        }
 
-	if (isset($body['time'])) {
-		$str .= ' ' . date("Uu", strtotime($body['time'])) . '000'; /*FIXME ugly hack to have default ns precision */
-	}
+        if (isset($body['time'])) {
+            $str .= ' ' . date("Uu", strtotime($body['time'])) . '000';
+        }
 
-	echo $str . PHP_EOL;
-	return $str;
+        return $str;
     }
 
 }
