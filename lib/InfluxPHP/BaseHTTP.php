@@ -78,7 +78,6 @@ class BaseHTTP
     {
         $response = curl_exec ($ch);
         $status   = (string)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        //$type     = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
         if ($status[0] != 2) {
             $response = print_r(json_decode($response), true);
@@ -130,12 +129,51 @@ class BaseHTTP
     protected function post($url, array $body, array $args = array())
     {
         $ch = $this->getCurl($url, $args);
+
+
         curl_setopt_array($ch, array(
             CURLOPT_POST =>  1,
-            CURLOPT_POSTFIELDS => json_encode($body),
+            CURLOPT_POSTFIELDS => $this->serializeBody($body),
         ));
 
         return $this->execCurl($ch);
+    }
+
+    protected function serializeBody(array $body) {
+	if (isset($body['tags'])) {
+		// Only one measurement
+		$str = $this->serializeMeasurement($body['measurement'], $body);
+	} else {
+		$str = '';
+		$measurement = $body['measurement'];
+		unset($body['measurement']);
+		foreach ($body as $meas) {
+			$str .= $this->serializeMeasurement($measurement, $meas);
+		}
+	}
+        return $str;
+    }
+
+    protected function serializeMeasurement($measurement, array $body) {
+	$str = $measurement . ',';
+	if (isset($body['tags'])) {
+		$str .= implode(',', array_map(
+                	function ($v, $k) { return $k . '=' . $v; },
+                	$body['tags'], array_keys($body['tags'])));
+	}
+	$str .= ' ';
+	if (isset($body['fields'])) {
+        	$str .= implode(',', array_map(
+                	function ($v, $k) { return $k . '=' . (is_numeric($v) ? $v : ('"' . $v . '"')); },
+                	$body['fields'], array_keys($body['fields'])));
+	}
+
+	if (isset($body['time'])) {
+		$str .= ' ' . date("Uu", strtotime($body['time'])) . '000'; /*FIXME ugly hack to have default ns precision */
+	}
+
+	echo $str . PHP_EOL;
+	return $str;
     }
 
 }

@@ -90,24 +90,14 @@ class DB extends BaseHTTP
         if (count($keys) > 1) { // be sure that multiple entries are well-formatted
             for ($i = 0; $i < count($keys); $i++) {
                 $elem = $data[$keys[$i]];
-                if (!isset($data[$keys[$i]]['name'])) {
-                    $data[$keys[$i]]['name'] = $name;
-                }
             }
         } else {
             if (!in_array(0, $keys, true)) {
                 return $this->insert($name, array($data));
-            } elseif (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
-                $data[0]['name'] = $name;
             }
         }
-        $body = array('database' => $this->name);
-        foreach ($data as $id => $val) {
-            $data[$id]["measurement"] = $name;
-        }
-
-        $points = array('points' => $data);
-        $body = array_merge($body, $points);
+        $body = array('measurement' => $this->name);
+        $body = array_merge($body, $data);
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
@@ -131,9 +121,8 @@ class DB extends BaseHTTP
     public function query($sql)
     {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
-      
     }
-    
+
     /**
      * Create retention policy of a database
      * 
@@ -168,7 +157,6 @@ class DB extends BaseHTTP
         return $this->query($query);
     }
 
-    
     /**
      * Show retention policies from database
      * 
@@ -178,7 +166,4 @@ class DB extends BaseHTTP
     {
         return($this->query('SHOW RETENTION POLICIES ' . $this->name));
     }
-    
-    
-    
 }
