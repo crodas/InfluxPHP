@@ -131,7 +131,6 @@ class DB extends BaseHTTP
     public function query($sql)
     {
         return ResultsetBuilder::buildResultSeries($this->get('query', array('db' => $this->name, 'q' => $sql, 'time_precision' => $this->timePrecision)));
-      
     }
     
     /**
@@ -176,7 +175,7 @@ class DB extends BaseHTTP
      */
     public function getRetentionPolicies()
     {
-        return($this->query('SHOW RETENTION POLICIES ' . $this->name));
+        return($this->query('SHOW RETENTION POLICIES ON ' . $this->name));
     }
     
     

@@ -7,6 +7,14 @@
         {
             "name": "César D. Rodas",
             "email": "crodas@php.net"
+        },
+        {
+            "name": "Rik van der Heijden",
+            "email": "rik.vanderheijden@dualinventive.com"
+        },
+        {
+            "name": "Jerry Jacobs",
+            "email": "jerry.jacobs@dualinventive.com"
         }
     ],
     "minimum-stability": "dev",

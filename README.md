@@ -1,19 +1,13 @@
 InfluxDB [![Build Status](https://travis-ci.org/crodas/InfluxPHP.png?branch=master)](https://travis-ci.org/crodas/InfluxPHP)
 ========
 
-Simple PHP client for [InfluxDB](http://influxdb.org/), an open-source, distributed, time series, events, and metrics database with no external dependencies.
-
+Simple PHP client for [InfluxDB](http://influxdb.org/), an open-source, distributed,
+ time series, events, and metrics database with no external dependencies.
 
 InfluxDB > v0.9 support
 =======================
 
-The 0.2.0 version of this library now supports InfluxDB 0.9. Please note that InfluxDB 0.9 is still pre-release software. 
-
-InfluxDB v0.8.X users
-=====================
-
-Influxdb >=0.9.0 brings many breaking changes to the API. InfluxDB 0.8.X users may use the legacy client by using the 0.1.* series instead.
-For the documentation, please have a look at the 0.1.* version!
+The library only supports the InfluxDB 0.9 or higher line protocol
 
 How to install it
 -----------------
