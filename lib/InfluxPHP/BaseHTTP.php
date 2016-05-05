@@ -127,12 +127,12 @@ class BaseHTTP
     }
 
     
-    protected function post($url, array $body, array $args = array())
+    protected function post($url, $body, array $args = array())
     {
         $ch = $this->getCurl($url, $args);
         curl_setopt_array($ch, array(
             CURLOPT_POST =>  1,
-            CURLOPT_POSTFIELDS => json_encode($body),
+            CURLOPT_POSTFIELDS => $body,
         ));
 
         return $this->execCurl($ch);

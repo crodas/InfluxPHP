@@ -81,33 +81,7 @@ class DB extends BaseHTTP
      */
     public function insert($name, array $data)
     {
-        $points = array();
-        if (isset($data['name'])) {
-            $name = $data['name'];
-            unset($data['name']);
-        }
-        $keys = array_keys($data);
-        if (count($keys) > 1) { // be sure that multiple entries are well-formatted
-            for ($i = 0; $i < count($keys); $i++) {
-                $elem = $data[$keys[$i]];
-                if (!isset($data[$keys[$i]]['name'])) {
-                    $data[$keys[$i]]['name'] = $name;
-                }
-            }
-        } else {
-            if (!in_array(0, $keys, true)) {
-                return $this->insert($name, array($data));
-            } elseif (!isset($data[0]['name'])) { // don't overwrite identifier name if submitted in data array
-                $data[0]['name'] = $name;
-            }
-        }
-        $body = array('database' => $this->name);
-        foreach ($data as $id => $val) {
-            $data[$id]["measurement"] = $name;
-        }
-
-        $points = array('points' => $data);
-        $body = array_merge($body, $points);
+        $body = $name . ',' . http_build_query($data['tags'], '', ',') . ' ' . http_build_query($data['fields'], '', ',');
         return $this->post('write', $body, array('db' => $this->name, 'time_precision' => $this->timePrecision));
     }
 
